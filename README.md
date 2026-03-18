@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="kitsutracker.webredirect.org/static/fox.png" width="300" alt="Kitsu Logo">
+  <img src="https://kitsutracker.webredirect.org/static/fox.png" width="300" alt="Kitsu Logo">
 </p>
 
 <h1 align="center">Kitsu Tracker for Stremio</h1>
