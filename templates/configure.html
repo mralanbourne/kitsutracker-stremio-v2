@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <nav class="navbar navbar-dark fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <span class="navbar-brand mb-0 h1 fw-bolder">
+                <i class="fa-solid fa-play me-2 text-kitsu"></i> Kitsu Tracker Configuration </span>
+            
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle text-light opacity-75" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-user-circle fs-5 me-1 text-kitsu"></i> Connected
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow">
+                    <li><a class="dropdown-item" href="{{ url_for('auth.refresh_token') }}"><i class="fa-solid fa-arrows-rotate me-2"></i> Refresh Token</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="alert border-info text-light d-flex align-items-center p-4 rounded-4 shadow-sm mb-4" style="background-color: rgba(13, 202, 240, 0.05); border-left: 5px solid #0dcaf0 !important;" role="alert">
+        <i class="fa-solid fa-circle-info fs-1 me-4 text-info"></i>
+        <div>
+            <h5 class="alert-heading fw-bold mb-2 text-info">How Updates Work in Stremio</h5>
+            <ul class="mb-0 small opacity-75 ps-3">
+                <li class="mb-1"><strong><i class="fa-solid fa-rotate text-success me-1"></i> Automatic (Watch Progress & Anime Lists):</strong> Whenever you watch an episode or update your lists on Kitsu, Stremio syncs this automatically in the background (visible after 5 minutes due to caching). <em>No reinstall needed!</em></li>
+                <li><strong><i class="fa-solid fa-hammer text-warning me-1"></i> Manual (Catalog Changes):</strong> If you change which lists are visible below (e.g., hiding "Dropped"), Stremio requires you to <strong>uninstall the old addon</strong> and click "Install" again.</li>
+            </ul>
+        </div>
+    </div>
+
+    <form class="card shadow-lg border-0 rounded-4 p-4 mb-4" action="/configure" method="post">
+        <h5 class="fw-bold mb-1">Step 1: Choose Visible Catalogs</h5>
+        <p class="text-light opacity-75 small mb-4">Select which Kitsu lists should appear on your Stremio home screen.</p>
+        
+        <div class="list-group list-group-flush mb-4 gap-2">
+            {% set user_catalogs = user.get('catalogs', None) %}
+            {% set no_catalogs = user_catalogs is none %}
+            
+            <label class="list-group-item d-flex justify-content-between align-items-center rounded-3 px-3 py-3 border" style="cursor: pointer;">
+                <span><i class="fa-solid fa-eye text-success me-3"></i> <span class="fw-semibold">Currently Watching</span></span>
+                <input class="form-check-input fs-5 m-0" type="checkbox" name="include_current" {% if no_catalogs or ("current" in user_catalogs) %}checked{% endif %}>
+            </label>
+
+            <label class="list-group-item d-flex justify-content-between align-items-center rounded-3 px-3 py-3 border" style="cursor: pointer;">
+                <span><i class="fa-solid fa-bookmark text-info me-3"></i> <span class="fw-semibold">Want to Watch</span></span>
+                <input class="form-check-input fs-5 m-0" type="checkbox" name="include_planned" {% if no_catalogs or ("planned" in user_catalogs) %}checked{% endif %}>
+            </label>
+
+            <label class="list-group-item d-flex justify-content-between align-items-center rounded-3 px-3 py-3 border" style="cursor: pointer;">
+                <span><i class="fa-solid fa-check-double text-primary me-3"></i> <span class="fw-semibold">Completed</span></span>
+                <input class="form-check-input fs-5 m-0" type="checkbox" name="include_completed" {% if no_catalogs or ("completed" in user_catalogs) %}checked{% endif %}>
+            </label>
+
+            <label class="list-group-item d-flex justify-content-between align-items-center rounded-3 px-3 py-3 border" style="cursor: pointer;">
+                <span><i class="fa-solid fa-pause text-warning me-3"></i> <span class="fw-semibold">On Hold</span></span>
+                <input class="form-check-input fs-5 m-0" type="checkbox" name="include_on_hold" {% if no_catalogs or ("on_hold" in user_catalogs) %}checked{% endif %}>
+            </label>
+
+            <label class="list-group-item d-flex justify-content-between align-items-center rounded-3 px-3 py-3 border" style="cursor: pointer;">
+                <span><i class="fa-solid fa-xmark text-danger me-3"></i> <span class="fw-semibold">Dropped</span></span>
+                <input class="form-check-input fs-5 m-0" type="checkbox" name="include_dropped" {% if no_catalogs or ("dropped" in user_catalogs) %}checked{% endif %}>
+            </label>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2 rounded-3" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i> Save Configuration</button>
+    </form>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-5" style="background-color: rgba(138, 90, 158, 0.05); border-left: 5px solid #8A5A9E !important;">
+        <h5 class="fw-bold mb-2 text-kitsu"><i class="fa-solid fa-download me-2"></i> Step 2: Install to Stremio</h5>
+        <p class="text-light opacity-75 small mb-3">
+            If you changed your catalogs above, please <strong>uninstall your current Kitsu addon in Stremio first</strong>, then click the button below to add the updated version.
+        </p>
+        
+        <div class="input-group mb-3">
+            <input id="manifest_url" type="text" class="form-control" style="background-color: #1A1924 !important; border-color: #3F3E50 !important; color: var(--kitsu-primary) !important; font-weight: bold;" value="{{ manifest_url }}" readonly>
+            <button class="btn btn-outline-secondary" style="border-color: #3F3E50;" type="button" onclick="copy_to_clipboard()" title="Copy Link"><i class="fa-regular fa-copy"></i></button>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex">
+            <button class="btn btn-success fw-bold flex-grow-1" onclick="location.href='{{ manifest_magnet }}'"><i class="fa-solid fa-desktop me-2"></i> Install in App</button>
+            <button class="btn btn-info text-white fw-bold flex-grow-1" style="background-color: #8A5A9E; border-color: #8A5A9E;" onclick="window.open('https://web.stremio.com/#/addons?addon=' + encodeURIComponent(document.getElementById('manifest_url').value), '_blank')"><i class="fa-solid fa-globe me-2"></i> Install on Web</button>
+        </div>
+    </div>
+{% endblock %}

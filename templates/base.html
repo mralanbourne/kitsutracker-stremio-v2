@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kitsu Addon for Stremio</title>
+    
+    <link rel="icon" type="image/png" href="/static/fox_small.png">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --kitsu-bg: #1A1924;
+            --kitsu-card: #2B2A3A;
+            --kitsu-primary: #FD755C;
+            --kitsu-primary-hover: #E3644B;
+        }
+        body {
+            background-color: var(--kitsu-bg);
+            color: #E0E0E0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background-color: var(--kitsu-card) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .card, .list-group-item {
+            background-color: var(--kitsu-card) !important;
+            border-color: #3F3E50 !important;
+            color: #E0E0E0;
+        }
+        .btn-primary, .btn-success {
+            background-color: var(--kitsu-primary) !important;
+            border-color: var(--kitsu-primary) !important;
+            color: #fff !important;
+            font-weight: 600;
+        }
+        .btn-primary:hover, .btn-success:hover {
+            background-color: var(--kitsu-primary-hover) !important;
+            border-color: var(--kitsu-primary-hover) !important;
+        }
+        .btn-kofi {
+            background-color: #29abe0 !important;
+            border-color: #29abe0 !important;
+            color: #fff !important;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-kofi:hover {
+            background-color: #228ebf !important;
+            transform: translateY(-2px);
+        }
+        .btn-github {
+            background-color: transparent !important;
+            border: 1px solid #3F3E50 !important;
+            color: #E0E0E0 !important;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-github:hover {
+            background-color: rgba(255,255,255,0.05) !important;
+            border-color: var(--kitsu-primary) !important;
+            transform: translateY(-2px);
+        }
+        .form-control {
+            background-color: #232231 !important;
+            border: 1px solid #3F3E50 !important;
+            color: #FFF !important;
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+        .form-control:focus {
+            background-color: #252433 !important;
+            border-color: var(--kitsu-primary) !important;
+            box-shadow: none !important;
+        }
+        .text-kitsu { color: var(--kitsu-primary) !important; }
+        .form-check-input:checked {
+            background-color: var(--kitsu-primary);
+            border-color: var(--kitsu-primary);
+        }
+        .content-wrapper {
+            flex: 1;
+        }
+    </style>
+</head>
+<body class="container">
+    {% block header %}{% endblock %}
+    <div class="row justify-content-center content-wrapper" style="margin-top: 100px;">
+        <div class="col-md-8 col-lg-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <div class="text-center mt-4 mb-5 pb-3">
+        <hr class="opacity-10 mb-4">
+        <p class="text-light opacity-50 small mb-3">If you like this addon, consider supporting the development :)</p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
+            <a href="https://ko-fi.com/mralanbourne" target="_blank" class="btn btn-kofi px-4 py-2">
+                <i class="fa-solid fa-mug-hot me-2"></i>Buy me a coffee
+            </a>
+            <a href="https://github.com/mralanbourne/kitsu-stremio-addon" target="_blank" class="btn btn-github px-4 py-2">
+                <i class="fa-brands fa-github me-2"></i>View on GitHub
+            </a>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function copy_to_clipboard() {
+            let copyText = document.getElementById("manifest_url");
+            if (copyText) {
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+                try {
+                    navigator.clipboard.writeText(copyText.value).then(() => alert("Manifest URL copied to clipboard!"));
+                } catch (err) {
+                    document.execCommand('copy');
+                    alert("Manifest URL copied to clipboard!");
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
