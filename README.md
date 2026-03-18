@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://[DEINE_KOYEB_URL].koyeb.app/static/fox.png" width="300" alt="Kitsu Logo">
+  <img src="kitsutracker.webredirect.org/static/fox.png" width="300" alt="Kitsu Logo">
 </p>
 
 <h1 align="center">Kitsu Tracker for Stremio</h1>
