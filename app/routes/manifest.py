@@ -13,7 +13,7 @@ MANIFEST: dict[str, Any] = {
     "version": "3.0.0",
     "name": "Kitsu Tracker",
     "description": "Your ultimate Kitsu anime catalog and watch-tracker for Stremio.",
-    "logo": "https://DEINE_NEUE_KOYEB_APP_URL.koyeb.app/static/fox_small.png",
+    "logo": "https://kitsutracker.koyeb.app/static/fox_small.png",
     "types": ["anime", "series", "movie"],
     "catalogs": [
         {
