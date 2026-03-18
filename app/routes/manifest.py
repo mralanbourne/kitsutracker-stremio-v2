@@ -10,7 +10,7 @@ genres = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha"
 
 MANIFEST: dict[str, Any] = {
     "id": "org.kitsu-stremio-sync",
-    "version": "2.0.1",
+    "version": "3.0.0",
     "name": "Kitsu Tracker",
     "description": "Your ultimate Kitsu anime catalog and watch-tracker for Stremio.",
     "logo": "https://DEINE_NEUE_KOYEB_APP_URL.koyeb.app/static/fox_small.png",
