@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://kitsutracker.webredirect.org/static/fox.png" width="300" alt="Kitsu Logo">
+  <img src="https://kitsutracker.koyeb.app/static/fox.png" width="300" alt="Kitsu Logo">
 </p>
 
 <h1 align="center">Kitsu Tracker for Stremio</h1>
@@ -16,10 +16,10 @@
 
 <div align="center">
   <h3>🌐 Community Instance</h3>
-  <a href="https://kitsutracker.webredirect.org">kitsutracker.webredirect.org</a>
+  <a href="https://kitsutracker.koyeb.app">kitsutracker.koyeb.app</a>
   <br />
   <br />
-  <a href="https://kitsutracker.webredirect.org">
+  <a href="https://kitsutracker.koyeb.app">
     <img src="https://img.shields.io/badge/INSTALL_NOW-CLICK_HERE-FD755C?style=for-the-badge&logo=rocket" alt="Install Button" height="55">
   </a>
 </div>
@@ -42,7 +42,7 @@
 * **🚀 High Performance:** Powered by a fully asynchronous Quart engine with an **Upstash Redis** backend and smart Edge-Caching for lightning-fast, connectionless catalog loading.
 
 ### 🦊 Quick Start
-1. **Login:** Open the **[Community Instance](https://kitsutracker.webredirect.org)** and sign in with your Kitsu account.
+1. **Login:** Open the **[Community Instance](https://kitsutracker.koyeb.app)** and sign in with your Kitsu account.
 2. **Setup:** Choose which catalogs you want to see in Stremio and click **Save**.
 3. **Install:** Use the **Install** buttons provided on the dashboard to add the addon to your Stremio client.
 
