@@ -56,23 +56,34 @@
 <details>
 <summary>💻 <strong>Self-Hosting Instructions (Developers)</strong></summary>
 
-### How to host your own instance
-This addon is optimized for modern PaaS environments (like Koyeb) using a high-performance asynchronous ASGI server (Hypercorn). To prevent traditional TCP connection exhaustion under high load, it uses a connectionless HTTP REST approach via Upstash Redis instead of standard databases like MongoDB.
+<br>
 
+### How to host your own instance
+This addon is optimized for modern PaaS environments (like Koyeb) using a high-performance asynchronous ASGI server (Hypercorn). To prevent traditional TCP connection exhaustion under high load, it uses a connectionless HTTP REST approach via Upstash Redis.
+
+#### 1. Prerequisites
+* **Upstash Redis:** Create a free serverless Redis database on [Upstash](https://upstash.com).
+* **Kitsu API Keys:** Since Kitsu closed their public developer API registration, you need to extract the client keys directly from their official web app to spoof the OAuth request:
+  1. Open [kitsu.io](https://kitsu.io) in your browser and make sure you are logged out.
+  2. Open your browser's **Developer Tools** (F12) and go to the **Network** tab.
+  3. Log into your Kitsu account on the website.
+  4. Look for a network request named `token` (the full URL is `https://kitsu.io/api/oauth/token`).
+  5. Click on this request and look at the **Payload** (Request Body). You will find the `client_id` and `client_secret` in plain text. Copy both strings.
+
+#### 2. Deployment
 1. **Clone the Repo:** `git clone https://github.com/mralanbourne/kitsu-stremio-addon.git`
-2. **Setup Upstash Redis:** Create a free serverless Redis database on [Upstash](https://upstash.com).
-3. **Deploy to Koyeb:**
-   - Create a new Web Service on Koyeb and connect your GitHub repository.
-   - Koyeb will automatically detect the `Procfile` and use Hypercorn to start the server.
-   - **Important:** Add the following Environment Variables in your Koyeb service settings:
+2. **Deploy to Koyeb:** Create a new Web Service on Koyeb and connect your GitHub repository. Koyeb will automatically detect the `Procfile` and use Hypercorn to boot the server.
+
+#### 3. Environment Variables
+Add the following variables in your Koyeb service settings before deploying:
 
 | Variable | Description |
 | :--- | :--- |
 | `UPSTASH_REDIS_REST_URL` | Your Upstash REST API URL (must include `https://`) |
 | `UPSTASH_REDIS_REST_TOKEN` | Your secure Upstash REST API Token |
 | `SECRET_KEY` | A random long string for secure session cookie encryption |
-| `KITSU_CLIENT_ID` | Kitsu API Client ID (Required for OAuth spoofing) |
-| `KITSU_CLIENT_SECRET` | Kitsu API Client Secret |
+| `KITSU_CLIENT_ID` | The Client ID you extracted via DevTools |
+| `KITSU_CLIENT_SECRET` | The Client Secret you extracted via DevTools |
 
 </details>
 
