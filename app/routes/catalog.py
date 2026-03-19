@@ -1,14 +1,13 @@
 import logging
 from urllib.parse import unquote
-from quart import Blueprint, abort, current_app
-from config import Config
-from ..services.db import get_valid_user
+from quart import Blueprint, abort
+from app.services.db import get_valid_user
+from app.services.kitsu_client import KitsuClient
 from .manifest import MANIFEST
 from .utils import respond_with
 
 catalog_bp = Blueprint("catalog", __name__)
 logger = logging.getLogger(__name__)
-KITSU_API_URL = "https://kitsu.io/api/edge"
 
 def _parse_stremio_filters(extra: str | None) -> dict:
     """Parses extra parameters from Stremio URL (skip, search, etc.)."""
@@ -38,27 +37,20 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
     # Caching Logic
     cache_time = 86400 if catalog_id == "kitsu_search" else 300
     filters = _parse_stremio_filters(extras)
-    headers = {
-        "Accept": "application/vnd.api+json",
-        "Authorization": f"Bearer {user.get('access_token')}"
-    }
+    access_token = user.get("access_token")
 
     stremio_metas = []
-    client = current_app.httpx_client 
 
     try:
-        
         if catalog_id == "kitsu_search":
             search_query = filters.get("search")
             if not search_query:
                 return await respond_with({"metas": []}, stremio_response=True)
                 
-            url = f"{KITSU_API_URL}/anime?filter[text]={search_query}&page[limit]=20"
-            resp = await client.get(url, headers=headers, timeout=5.0)
-            resp.raise_for_status()
-            data = resp.json().get("data", [])
+            data = await KitsuClient.search_anime(search_query, access_token)
+            anime_list = data.get("data", [])
             
-            for item in data:
+            for item in anime_list:
                 attrs = item.get("attributes", {})
          
                 title = attrs.get("canonicalTitle") or attrs.get("titles", {}).get("en_jp", "Unknown")
@@ -78,12 +70,8 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
         
         else:
             offset = int(filters.get("skip", 0))
-            url = f"{KITSU_API_URL}/library-entries?filter[user_id]={user.get('id')}&filter[kind]=anime&filter[status]={catalog_id}&include=anime&page[limit]=20&page[offset]={offset}&sort=-updatedAt"
-
-            resp = await client.get(url, headers=headers, timeout=5.0)
-            resp.raise_for_status()
+            data = await KitsuClient.get_library_catalog(user.get("id"), catalog_id, offset, access_token)
             
-            data = resp.json()
             entries = data.get("data", [])
             included = data.get("included", [])
 
@@ -122,7 +110,7 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
             {"metas": stremio_metas},
             private=False,
             cache_max_age=cache_time,
-            stale_revalidate=0,           # Override Config.DEFAULT_STALE_WHILE_REVALIDATE to guarantee 100% accurate watch status after 5 mins     
+            stale_revalidate=0,           
             stremio_response=True
         )
 
