@@ -2,16 +2,18 @@
   <img src="https://kitsutracker.koyeb.app/static/fox.png" width="300" alt="Kitsu Logo">
 </p>
 
-<h1 align="center">Kitsu Tracker for Stremio</h1>
+<h1 align="center">Kitsu Tracker for Stremio V2</h1>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/Stremio-Addon-8a5a9e?style=for-the-badge&logo=stremio" alt="Stremio Addon">
   <img src="https://img.shields.io/badge/Status-Online-success?style=for-the-badge" alt="Status Online">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License MIT">
+  <img src="https://img.shields.io/badge/docker-ready-2496ED.svg?logo=docker&logoColor=white" alt="Docker Ready">
 </p>
 
 <p align="center">
-  <strong>The fully fledged bridge between Stremio and Kitsu. Sync your progress automatically without lifting a finger.</strong>
+  <strong>The definitive, high-performance bridge between Stremio and Kitsu. Sync your watch progress automatically and access your personal catalogs with ease.</strong>
 </p>
 
 <div align="center">
@@ -31,25 +33,25 @@
 > Kitsu currently lacks standard OAuth2 for third-party apps, meaning you need to log in directly via this interface. I take your data security very seriously:
 >
 > * **Zero Password Storage:** Your password is strictly used **once** to generate a secure Kitsu access token. It is never stored in the database or logged anywhere.
-> * **Encrypted Client Sessions:** Your active session is cryptographically signed and stored locally in your browser's cookies. The server does not keep your session in its memory.
-> * **Minimal Data:** I only store your Kitsu ID, the generated tokens, and your watch progress to make the sync work.
+> * **Encrypted Client Sessions:** Your active session is cryptographically signed and stored locally in your browser's cookies.
+> * **Minimal Data:** Only your Kitsu ID, generated tokens, and watch progress are stored to facilitate synchronization.
 > * **100% Open Source:** Don't trust, verify! The entire architecture is public.
 
 ### ✨ Features
 * **⚡ Auto-Tracking:** Your episode progress updates automatically on Kitsu in the background the moment you press play.
-* **🔍 Native Kitsu Search:** Search for anime directly through the addon. This ensures Stremio uses proper `kitsu:` IDs, allowing brand new shows to be auto-added to your "Watching" list automatically!
+* **🔍 Native Kitsu Search:** Search for anime directly through the addon to ensure Stremio uses proper kitsu: IDs.
 * **📂 Personal Catalogs:** Browse your Kitsu lists (Watching, Planned, Completed, etc.) directly as native Stremio rows.
-* **🚀 High Performance:** Powered by a fully asynchronous Quart engine with an **Upstash Redis** backend and smart Edge-Caching for lightning-fast, connectionless catalog loading.
+* **🚀 High Performance:** Powered by a fully asynchronous Quart engine with an Upstash Redis backend for lightning-fast catalog loading.
 
 ### 🦊 Quick Start
-1. **Login:** Open the **[Community Instance](https://kitsutracker.koyeb.app)** and sign in with your Kitsu account.
-2. **Setup:** Choose which catalogs you want to see in Stremio and click **Save**.
-3. **Install:** Use the **Install** buttons provided on the dashboard to add the addon to your Stremio client.
+1. **Login:** Open the Community Instance and sign in with your Kitsu account.
+2. **Setup:** Choose which catalogs you want to see in Stremio and click Save.
+3. **Install:** Use the Install button on the dashboard to add the addon to Stremio.
 
 > [!IMPORTANT]
-> **Tracking New Anime:** To ensure a completely new anime is added to your Kitsu list automatically, always search for it in Stremio and select the result under the **"Kitsu: Search"** category (not the default Cinemeta result).
+> **Tracking New Anime:** To ensure a new anime is added to your Kitsu list automatically, search for it in Stremio and select the result under the "Kitsu: Search" category.
 > 
-> **Syncing Note:** Stremio caches catalogs aggressively. It can take **up to 5 minutes** for list changes (like moving a show to "Completed") to visually update on your home screen due to Edge Caching. However, your actual watch progress on the Kitsu servers is saved instantly! 😘
+> **Syncing Note:** Stremio caches catalogs aggressively. It can take up to 5 minutes for list changes to visually update on your home screen.
 
 ---
 
@@ -59,38 +61,40 @@
 <br>
 
 ### How to host your own instance
-This addon is optimized for modern PaaS environments (like Koyeb) using a high-performance asynchronous ASGI server (Hypercorn). To prevent traditional TCP connection exhaustion under high load, it uses a connectionless HTTP REST approach via Upstash Redis.
+V2 is fully Dockerized and optimized for modern PaaS environments using an asynchronous ASGI server (Hypercorn). It utilizes a connectionless HTTP REST approach via Upstash Redis.
 
 #### 1. Prerequisites
-* **Upstash Redis:** Create a free serverless Redis database on [Upstash](https://upstash.com).
-* **Kitsu API Keys:** Since Kitsu closed their public developer API registration, you need to extract the client keys directly from their official web app to spoof the OAuth request:
-  1. Open [kitsu.io](https://kitsu.io) in your browser and make sure you are logged out.
-  2. Open your browser's **Developer Tools** (F12) and go to the **Network** tab.
-  3. Log into your Kitsu account on the website.
-  4. Look for a network request named `token` (the full URL is `https://kitsu.io/api/oauth/token`).
-  5. Click on this request and look at the **Payload** (Request Body). You will find the `client_id` and `client_secret` in plain text. Copy both strings.
+* **Upstash Redis:** Create a free serverless Redis database on Upstash (https://upstash.com).
+* **Kitsu API Keys:** Extract client keys from the official web app:
+  1. Open kitsu.io and log in.
+  2. Open Developer Tools (F12) -> Network tab.
+  3. Look for a request named token (https://kitsu.io/api/oauth/token).
+  4. Find client_id and client_secret in the request payload.
 
-#### 2. Deployment
-1. **Clone the Repo:** `git clone https://github.com/mralanbourne/kitsu-stremio-addon.git`
-2. **Deploy to Koyeb:** Create a new Web Service on Koyeb and connect your GitHub repository. Koyeb will automatically detect the `Procfile` and use Hypercorn to boot the server.
-
-#### 3. Environment Variables
-Add the following variables in your Koyeb service settings before deploying:
-
-| Variable | Description |
-| :--- | :--- |
-| `UPSTASH_REDIS_REST_URL` | Your Upstash REST API URL (must include `https://`) |
-| `UPSTASH_REDIS_REST_TOKEN` | Your secure Upstash REST API Token |
-| `SECRET_KEY` | A random long string for secure session cookie encryption |
-| `KITSU_CLIENT_ID` | The Client ID you extracted via DevTools |
-| `KITSU_CLIENT_SECRET` | The Client Secret you extracted via DevTools |
+#### 2. Deployment (Docker)
+1. **Clone the Repo:** 
+```git clone https://github.com/mralanbourne/kitsutracker-stremio-v2.git```
+   cd ```kitsutracker-stremio-v2```
+2. **Build and Run:**
+   ```docker build -t kitsutracker
+      docker run -p 8000:8000 \
+     -e UPSTASH_REDIS_REST_URL="your_url" \
+     -e UPSTASH_REDIS_REST_TOKEN="your_token" \
+     -e SECRET_KEY="random_string" \
+     -e KITSU_CLIENT_ID="your_id" \
+     -e KITSU_CLIENT_SECRET="your_secret" \
+     kitsutracker
+#### 3. Cloud Deployment (e.g., Koyeb)
+Koyeb will automatically detect the Dockerfile in the root directory. 
+* **Port:** Ensure the port is set to 8000 in your service settings.
+* **Environment Variables:** Add all variables listed in the example above to your environment configuration.
 
 </details>
 
 ---
 
 ### ☕ Support
-I'm hosting this instance for free for the community. If you find this service useful, consider supporting the development to keep the server running as the user base grows!
+I'm hosting this instance for free for the community. If you find this service useful, consider supporting the development!
 
 <a href="https://ko-fi.com/mralanbourne" target="_blank">
   <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="40" alt="Buy Me a Coffee at ko-fi.com" />
