@@ -33,6 +33,7 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
         return await respond_with(dummy_sub, **cache_config)
 
     access_token = user.get("access_token")
+    user_internal_id = user.get("id")
 
     try:
         anime_data = await KitsuClient.get_anime(anime_id, access_token)
@@ -40,7 +41,7 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
         
         target_status = "completed" if total_episodes and episode >= total_episodes else "current"
 
-        search_data = await KitsuClient.search_library_entries(user.get("id"), anime_id, access_token)
+        search_data = await KitsuClient.search_library_entries(user_internal_id, anime_id, access_token)
         entries = search_data.get("data", [])
 
         if entries:
@@ -48,12 +49,16 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
             await KitsuClient.update_library_entry(entry_id, episode, target_status, access_token)
         else:
             try:
-                await KitsuClient.create_library_entry(user.get("id"), anime_id, episode, target_status, access_token)
+                await KitsuClient.create_library_entry(user_internal_id, anime_id, episode, target_status, access_token)
             except Exception as e:
-                logger.warning(f"Could not create entry (possible Stremio double-fire): {e}")
+                logger.warning(f"Could not create entry for {user_internal_id} (possible Stremio double-fire): {e}")
 
-        await update_user_progress(user, anime_id, episode)
-        logger.info(f"Progress synced: {auth_id} | Anime {anime_id} | Ep {episode}")
+        write_success = await update_user_progress(user, anime_id, episode)
+        
+        if write_success:
+            logger.info(f"Progress synced & saved: {auth_id} | Anime {anime_id} | Ep {episode}")
+        else:
+            logger.critical(f"DATA LOSS RISK: API synced but Upstash DB write failed for {auth_id} | Anime {anime_id}")
 
     except Exception as e:
         logger.error(f"Sync Error for {auth_id}: {e}")
