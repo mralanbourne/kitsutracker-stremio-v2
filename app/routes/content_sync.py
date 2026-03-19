@@ -50,7 +50,7 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
         else:
             await KitsuClient.create_library_entry(user.get("id"), anime_id, episode, target_status, access_token)
 
-        await update_user_progress(auth_id, anime_id, episode)
+        await update_user_progress(user, anime_id, episode)
         logger.info(f"Progress synced: {auth_id} | Anime {anime_id} | Ep {episode}")
 
     except Exception as e:
