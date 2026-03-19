@@ -94,6 +94,7 @@
 </head>
 <body class="container">
     {% block header %}{% endblock %}
+    
     <div class="row justify-content-center content-wrapper" style="margin-top: 100px;">
         <div class="col-md-8 col-lg-6">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -104,10 +105,18 @@
                 </div>
                 {% endfor %}
             {% endwith %}
+            
             {% block content %}{% endblock %}
         </div>
     </div>
+    
     <div class="text-center mt-4 mb-5 pb-3">
+        <div class="mb-4">
+            <span id="kitsu-status-badge" class="badge rounded-pill px-3 py-2" style="background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #E0E0E0; transition: all 0.3s ease;">
+                <i class="fa-solid fa-circle-notch fa-spin me-2 opacity-75"></i><span class="opacity-75">Checking Kitsu API...</span>
+            </span>
+        </div>
+
         <hr class="opacity-10 mb-4">
         <p class="text-light opacity-50 small mb-3">If you like this addon, consider supporting the development :)</p>
         <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
@@ -119,7 +128,31 @@
             </a>
         </div>
     </div>
+
     <script type="text/javascript">
+        // Kitsu API Health Check
+        document.addEventListener("DOMContentLoaded", function() {
+            const badge = document.getElementById('kitsu-status-badge');
+            
+            fetch('https://kitsu.io/api/edge', { method: 'GET', cache: 'no-store' })
+                .then(response => {
+                    if (response.ok) {
+                        badge.style.backgroundColor = 'rgba(25, 135, 84, 0.1)';
+                        badge.style.borderColor = 'rgba(25, 135, 84, 0.3)';
+                        badge.style.color = '#20c997';
+                        badge.innerHTML = '<i class="fa-solid fa-server me-2"></i>Kitsu API: Online';
+                    } else {
+                        throw new Error('API Error');
+                    }
+                })
+                .catch(error => {
+                    badge.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                    badge.style.borderColor = 'rgba(220, 53, 69, 0.3)';
+                    badge.style.color = '#ff6b6b';
+                    badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-2"></i>Kitsu API: Offline / Issues';
+                });
+        });
+
         function copy_to_clipboard() {
             let copyText = document.getElementById("manifest_url");
             if (copyText) {
