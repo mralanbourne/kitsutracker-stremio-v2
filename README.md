@@ -44,7 +44,7 @@
 * **🚀 High Performance:** Powered by a fully asynchronous Quart engine with an Upstash Redis backend for lightning-fast catalog loading.
 
 ### 🦊 Quick Start
-1. **Login:** Open the Community Instance and sign in with your Kitsu account.
+1. **Login:** Open the [Community Instance](https://kitsutracker.koyeb.app) and sign in with your Kitsu account.
 2. **Setup:** Choose which catalogs you want to see in Stremio and click Save.
 3. **Install:** Use the Install button on the dashboard to add the addon to Stremio.
 
