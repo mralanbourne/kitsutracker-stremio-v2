@@ -5,7 +5,7 @@
 <h1 align="center">Kitsu Tracker for Stremio V2</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.1.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/Stremio-Addon-8a5a9e?style=for-the-badge&logo=stremio" alt="Stremio Addon">
   <img src="https://img.shields.io/badge/Status-Online-success?style=for-the-badge" alt="Status Online">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License MIT">
@@ -33,15 +33,16 @@
 > Kitsu currently lacks standard OAuth2 for third-party apps, meaning you need to log in directly via this interface. I take your data security very seriously:
 >
 > * **Zero Password Storage:** Your password is strictly used **once** to generate a secure Kitsu access token. It is never stored in the database or logged anywhere.
-> * **Encrypted Client Sessions:** Your active session is cryptographically signed and stored locally in your browser's cookies.
+> * **Secure Client Sessions:** Only your non-sensitive Kitsu User ID is cryptographically signed and stored locally in your browser. All sensitive refresh tokens are completely isolated and secured in the backend database.
 > * **Minimal Data:** Only your Kitsu ID, generated tokens, and watch progress are stored to facilitate synchronization.
 > * **100% Open Source:** Don't trust, verify! The entire architecture is public.
 
 ### ✨ Features
 * **⚡ Auto-Tracking:** Your episode progress updates automatically on Kitsu in the background the moment you press play.
+* **🔄 Auto-Healing Sessions:** Your Kitsu access tokens are automatically refreshed in the background before they expire, ensuring your tracking never drops out mid-binge.
 * **🔍 Native Kitsu Search:** Search for anime directly through the addon to ensure Stremio uses proper kitsu: IDs.
 * **📂 Personal Catalogs:** Browse your Kitsu lists (Watching, Planned, Completed, etc.) directly as native Stremio rows.
-* **🚀 High Performance:** Powered by a fully asynchronous Quart engine with an Upstash Redis backend for lightning-fast catalog loading.
+* **🚀 High Performance:** Powered by a fully asynchronous Quart engine, robust API retry logic, and an Upstash Redis backend for lightning-fast catalog loading.
 
 ### 🦊 Quick Start
 1. **Login:** Open the [Community Instance](https://kitsutracker.koyeb.app) and sign in with your Kitsu account.
@@ -58,51 +59,52 @@
 <details>
 <summary>💻 <strong>Self-Hosting Instructions (Developers)</strong></summary>
 
-<br>
-
 ### How to host your own instance
 V2 is fully Dockerized and optimized for modern PaaS environments using an asynchronous ASGI server (Hypercorn). It utilizes a connectionless HTTP REST approach via Upstash Redis.
 
 #### 1. Prerequisites
-* **Upstash Redis:** Create a free serverless Redis database on Upstash (https://upstash.com).
+* **Upstash Redis:** Create a free serverless Redis database on [Upstash](https://upstash.com).
 * **Kitsu API Keys:** Extract client keys from the official web app:
   1. Open [Kitsu](https://kitsu.app/)
   2. Open Developer Tools (F12) -> Network tab and log in.
-  3. Look for a request named token (https://kitsu.io/api/oauth/token).
-  4. Find client_id and client_secret in the request payload.
+  3. Look for a request named token ```https://kitsu.io/api/oauth/token```.
+  4. Find ```client_id``` and ```client_secret``` in the request payload.
 
 #### 2. Deployment (Docker)
 1. **Clone the Repo:** 
-```git clone https://github.com/mralanbourne/kitsutracker-stremio-v2.git```
-   cd ```kitsutracker-stremio-v2```
+``` git clone https://github.com/mralanbourne/kitsutracker-stremio-v2.git```
+and then ```cd kitsutracker-stremio-v2```
+<br>
+
 2. **Build and Run:**
-   ```docker build -t kitsutracker
-      docker run -p 8000:8000 \
-     -e UPSTASH_REDIS_REST_URL="your_url" \
-     -e UPSTASH_REDIS_REST_TOKEN="your_token" \
-     -e SECRET_KEY="random_string" \
-     -e KITSU_CLIENT_ID="your_id" \
-     -e KITSU_CLIENT_SECRET="your_secret" \
-     kitsutracker
-#### 3. Cloud Deployment (e.g., Koyeb)
-Koyeb will automatically detect the Dockerfile in the root directory. 
-* **Port:** Ensure the port is set to 8000 in your service settings.
-* **Environment Variables:** Add all variables listed in the example above to your environment configuration.
+``` docker build -t kitsutracker
+docker run -p 8000:8000 \
+  -e UPSTASH_REDIS_REST_URL="your_url" \
+  -e UPSTASH_REDIS_REST_TOKEN="your_token" \
+  -e SECRET_KEY="random_string" \
+  -e KITSU_CLIENT_ID="your_id" \
+  -e KITSU_CLIENT_SECRET="your_secret" \
+  kitsutracker
+```
+3. **Cloud Deployment (e.g., Koyeb)**
+
+Koyeb will automatically detect the Dockerfile in the root directory.
+
+    Port: Ensure the port is set to 8000 in your service settings.
+
+    Environment Variables: Add all variables listed in the example above to your environment configuration.
 
 </details>
+☕ Support
 
----
-
-### ☕ Support
 I'm hosting this instance for free for the community. If you find this service useful, consider supporting the development!
 
 <a href="https://ko-fi.com/mralanbourne" target="_blank">
-  <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="40" alt="Buy Me a Coffee at ko-fi.com" />
+<img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="40" alt="Buy Me a Coffee at ko-fi.com" />
 </a>
 
-<br>
-
 <p align="center">
-  Made with ❤️ for the Anime Community.<br>
-  <sub>Based on the architecture of <a href="https://github.com/SageTendo/mal-stremio-addon">MAL-Stremio Addon</a> by SageTendo.</sub>
+Made with ❤️ for the Anime Community.
+
+<sub>Based on the architecture of <a href="https://github.com/SageTendo/mal-stremio-addon">MAL-Stremio Addon</a> by SageTendo.</sub>
 </p>
