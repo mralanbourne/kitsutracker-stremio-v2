@@ -28,19 +28,18 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
     if error or not user:
         return await respond_with(dummy_sub, **cache_config)
 
-    if episode <= user.get("progress", {}).get(anime_id, 0):
+    user_progress = user.get("progress") or {}
+    if episode <= user_progress.get(anime_id, 0):
         return await respond_with(dummy_sub, **cache_config)
 
     access_token = user.get("access_token")
 
     try:
-        # Check Total Episodes
         anime_data = await KitsuClient.get_anime(anime_id, access_token)
         total_episodes = anime_data.get("data", {}).get("attributes", {}).get("episodeCount")
         
         target_status = "completed" if total_episodes and episode >= total_episodes else "current"
 
-        # Search library entry
         search_data = await KitsuClient.search_library_entries(user.get("id"), anime_id, access_token)
         entries = search_data.get("data", [])
 
@@ -48,7 +47,10 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
             entry_id = entries[0]["id"]
             await KitsuClient.update_library_entry(entry_id, episode, target_status, access_token)
         else:
-            await KitsuClient.create_library_entry(user.get("id"), anime_id, episode, target_status, access_token)
+            try:
+                await KitsuClient.create_library_entry(user.get("id"), anime_id, episode, target_status, access_token)
+            except Exception as e:
+                logger.warning(f"Could not create entry (possible Stremio double-fire): {e}")
 
         await update_user_progress(user, anime_id, episode)
         logger.info(f"Progress synced: {auth_id} | Anime {anime_id} | Ep {episode}")
