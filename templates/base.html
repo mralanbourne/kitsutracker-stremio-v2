@@ -134,7 +134,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const badge = document.getElementById('kitsu-status-badge');
             
-            fetch('https://kitsu.io/api/edge', { method: 'GET', cache: 'no-store' })
+            fetch('/kitsu-status', { method: 'GET', cache: 'no-store' })
                 .then(response => {
                     if (response.ok) {
                         badge.style.backgroundColor = 'rgba(25, 135, 84, 0.1)';
