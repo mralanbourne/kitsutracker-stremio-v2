@@ -1,6 +1,6 @@
 import hashlib
 import logging
-from quart import Blueprint, flash, make_response, redirect, render_template, request, session, url_for
+from quart import Blueprint, flash, make_response, redirect, render_template, request, session, url_for, current_app
 from app.services.db import get_user, store_user
 
 ui_bp = Blueprint("ui", __name__)
@@ -16,6 +16,18 @@ async def index():
 async def health_check():
 
     return {"status": "alive", "message": "Koyeb, don't you dare sleep."}, 200
+
+@ui_bp.route("/kitsu-status")
+async def kitsu_status():
+    client = current_app.httpx_client
+    try:
+        
+        resp = await client.get("https://kitsu.io/api/edge", timeout=3.0)
+        if resp.status_code == 200:
+            return {"status": "online"}, 200
+        return {"status": "offline"}, 503
+    except Exception:
+        return {"status": "offline"}, 503
 
 @ui_bp.route("/config")
 async def stremio_config():
