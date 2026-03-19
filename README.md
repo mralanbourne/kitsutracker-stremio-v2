@@ -51,7 +51,7 @@
 > [!IMPORTANT]
 > **Tracking New Anime:** To ensure a new anime is added to your Kitsu list automatically, search for it in Stremio and select the result under the "Kitsu: Search" category.
 > 
-> **Syncing Note:** Stremio caches catalogs aggressively. It can take up to 5 minutes for list changes to visually update on your home screen.
+> **Syncing Note:** Stremio caches catalogs aggressively. It can take up to 5 minutes for list changes to visually update on your home screen. (changes on Kitsu are instant though😘) 
 
 ---
 
