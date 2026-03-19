@@ -1,7 +1,6 @@
 import logging
 import asyncio
 import json
-from collections import defaultdict
 from quart import current_app
 from config import Config
 
@@ -10,8 +9,8 @@ logger = logging.getLogger(__name__)
 class KitsuClient:
     KITSU_API_URL = "https://kitsu.io/api/edge"
     KITSU_OAUTH_URL = "https://kitsu.io/api/oauth/token"
-    
-    _user_semaphores = defaultdict(lambda: asyncio.Semaphore(3))
+
+    _user_semaphores = {}
 
     @staticmethod
     def _get_client():
@@ -21,8 +20,10 @@ class KitsuClient:
     async def _request_with_retry(cls, method: str, url: str, retries=3, user_id_for_lock=None, **kwargs):
         client = cls._get_client()
         
-        # Concurrency Control
+        # Concurrency Control: Semaphore "lazy"
         if user_id_for_lock:
+            if user_id_for_lock not in cls._user_semaphores:
+                cls._user_semaphores[user_id_for_lock] = asyncio.Semaphore(3)
             await cls._user_semaphores[user_id_for_lock].acquire()
             
         try:
@@ -45,8 +46,13 @@ class KitsuClient:
                     if attempt == retries - 1:
                         logger.error(f"Kitsu API failed after {retries} attempts on {url}: {e}")
                         raise
-                    # Exponential Backoff with Jitter if 429 Too Many Requests
-                    wait_time = 2 * (attempt + 1) if getattr(e, "response", None) and e.response.status_code == 429 else 1 * (attempt + 1)
+                    
+                    # Safe Backoff for AttributeError @ Timeouts
+                    wait_time = 1 * (attempt + 1)
+                    if hasattr(e, "response") and e.response is not None:
+                        if e.response.status_code == 429:
+                            wait_time = 2 * (attempt + 1)
+                            
                     await asyncio.sleep(wait_time) 
         finally:
             if user_id_for_lock:
