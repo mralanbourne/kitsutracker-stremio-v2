@@ -12,11 +12,6 @@ async def index():
         return redirect(url_for("ui.configure"))
     return await render_template("index.html")
 
-@ui_bp.route("/health")
-async def health_check():
-
-    return {"status": "alive", "message": "Koyeb, don't you dare sleep."}, 200
-
 @ui_bp.route("/config")
 async def stremio_config():
     return await render_template("index.html")
