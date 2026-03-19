@@ -66,8 +66,8 @@ V2 is fully Dockerized and optimized for modern PaaS environments using an async
 #### 1. Prerequisites
 * **Upstash Redis:** Create a free serverless Redis database on Upstash (https://upstash.com).
 * **Kitsu API Keys:** Extract client keys from the official web app:
-  1. Open kitsu.io and log in.
-  2. Open Developer Tools (F12) -> Network tab.
+  1. Open [Kitsu](https://kitsu.app/)
+  2. Open Developer Tools (F12) -> Network tab and log in.
   3. Look for a request named token (https://kitsu.io/api/oauth/token).
   4. Find client_id and client_secret in the request payload.
 
