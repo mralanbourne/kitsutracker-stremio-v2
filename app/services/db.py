@@ -74,7 +74,21 @@ async def get_valid_user(user_id: str) -> tuple[dict, Optional[str]]:
         return {}, "Invalid Kitsu session. Please log in again."
 
     expiration_date = user["last_updated"] + timedelta(seconds=user["expires_in"])
-    if datetime.utcnow() > expiration_date:
-        return {}, "Kitsu session expired. Please refresh token or log in again."
-        
+    
+    # Auto-Refresh Kitsu Token:
+    if datetime.utcnow() > (expiration_date - timedelta(minutes=5)):
+        logger.info(f"Token expired or expiring soon for user {user_id}. Attempting auto-refresh.")
+        from app.services.kitsu_client import KitsuClient
+        try:
+            tokens = await KitsuClient.refresh_token(user["refresh_token"])
+            user["access_token"] = tokens["access_token"]
+            user["refresh_token"] = tokens.get("refresh_token", user["refresh_token"])
+            user["expires_in"] = tokens["expires_in"]
+            user["last_updated"] = datetime.utcnow()
+            await store_user(user)
+            logger.info(f"Auto-refresh successful for user {user_id}.")
+        except Exception as e:
+            logger.error(f"Auto-refresh failed for user {user_id}: {e}")
+            return {}, "Kitsu session expired and refresh failed. Please log in again."
+            
     return user, None
