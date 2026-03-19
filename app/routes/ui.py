@@ -22,7 +22,7 @@ async def kitsu_status():
     client = current_app.httpx_client
     try:
         
-        resp = await client.get("https://kitsu.io/api/edge", timeout=3.0)
+        resp = await client.get("https://kitsu.io/api/edge/anime?page[limit]=1", timeout=3.0)
         if resp.status_code == 200:
             return {"status": "online"}, 200
         return {"status": "offline"}, 503
