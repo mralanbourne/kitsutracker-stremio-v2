@@ -5,7 +5,7 @@
 <h1 align="center">Kitsu Tracker for Stremio V2</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.1.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.0.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/Stremio-Addon-8a5a9e?style=for-the-badge&logo=stremio" alt="Stremio Addon">
   <img src="https://img.shields.io/badge/Status-Online-success?style=for-the-badge" alt="Status Online">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License MIT">
