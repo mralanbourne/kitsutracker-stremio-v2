@@ -98,13 +98,13 @@ Koyeb will automatically detect the Dockerfile in the root directory.
 ☕ Support
 
 I'm hosting this instance for free for the community. If you find this service useful, consider supporting the development!
-
+<p align="center">
 <a href="https://ko-fi.com/mralanbourne" target="_blank">
 <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="40" alt="Buy Me a Coffee at ko-fi.com" />
 </a>
 
 <p align="center">
 Made with ❤️ for the Anime Community.
-
+<p align="center">
 <sub>Based on the architecture of <a href="https://github.com/SageTendo/mal-stremio-addon">MAL-Stremio Addon</a> by SageTendo.</sub>
 </p>
