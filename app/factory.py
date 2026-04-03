@@ -2,23 +2,26 @@ import os
 import httpx
 import logging
 from quart import Quart
+from quart_cors import cors
 from config import Config
 
-
+# Logging Configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 def create_app():
-
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    template_dir = os.path.join(base_dir, 'templates')
-    static_dir = os.path.join(base_dir, 'static')
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    template_dir = os.path.join(base_dir, "templates")
+    static_dir = os.path.join(base_dir, "static")
 
     app = Quart(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
+
+    # CORS Setup
+    app = cors(app, allow_origin="*")
 
     @app.before_serving
     async def create_client():
