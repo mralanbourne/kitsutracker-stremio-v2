@@ -18,10 +18,10 @@
 
 <div align="center">
   <h3>🌐 Community Instance</h3>
-  <a href="https://kitsutracker.koyeb.app">kitsutracker.koyeb.app</a>
+  <a href="https://kitsu.ruka.pw/">kitsu.ruka.pw</a>
   <br />
   <br />
-  <a href="https://kitsutracker.koyeb.app">
+  <a href="https://kitsu.ruka.pw/">
     <img src="https://img.shields.io/badge/INSTALL_NOW-CLICK_HERE-FD755C?style=for-the-badge&logo=rocket" alt="Install Button" height="55">
   </a>
 </div>
@@ -45,7 +45,7 @@
 * **🚀 High Performance:** Powered by a fully asynchronous Quart engine, robust API retry logic, and an Upstash Redis backend for lightning-fast catalog loading.
 
 ### 🦊 Quick Start
-1. **Login:** Open the [Community Instance](https://kitsutracker.koyeb.app) and sign in with your Kitsu account.
+1. **Login:** Open the [Community Instance](https://kitsu.ruka.pw/) and sign in with your Kitsu account.
 2. **Setup:** Choose which catalogs you want to see in Stremio and click Save.
 3. **Install:** Use the Install button on the dashboard to add the addon to Stremio.
 
