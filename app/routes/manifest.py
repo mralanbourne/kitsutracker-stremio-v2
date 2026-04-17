@@ -1,5 +1,5 @@
 from typing import Any
-from quart import Blueprint
+from quart import Blueprint, request
 from config import Config
 from app.services.db import get_user
 from app.routes.utils import respond_with
@@ -13,7 +13,6 @@ MANIFEST: dict[str, Any] = {
     "version": "4.0.0",
     "name": "Kitsu Tracker",
     "description": "Your ultimate Kitsu anime catalog and watch-tracker for Stremio.",
-    "logo": "https://kitsutracker.koyeb.app/static/fox_small.png",
     "types": ["anime", "series", "movie"],
     "catalogs": [
         {
@@ -55,14 +54,13 @@ MANIFEST: dict[str, Any] = {
     ],
     "behaviorHints": {"configurable": True},
     "resources": ["catalog", "subtitles"], 
-    
-
     "idPrefixes": ["kitsu"]
 }
 
 @manifest_blueprint.route("/manifest.json", methods=["GET", "OPTIONS"])
 async def addon_unconfigured_manifest():
     unconfigured_manifest = MANIFEST.copy()
+    unconfigured_manifest["logo"] = f"{request.host_url.rstrip('/')}/static/fox_small.png"
     unconfigured_manifest["behaviorHints"] = {
         "configurable": True,
         "configurationRequired": True,
@@ -81,6 +79,7 @@ async def addon_configured_manifest(user_id: str):
         return await respond_with({"error": "User not found"}, private=True, cache_max_age=1800)
     
     user_manifest = MANIFEST.copy()
+    user_manifest["logo"] = f"{request.host_url.rstrip('/')}/static/fox_small.png"
     user_catalogs = user.get("catalogs")
 
     if user_catalogs is not None:
