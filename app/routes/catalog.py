@@ -56,9 +56,7 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
                 title = attrs.get("canonicalTitle") or attrs.get("titles", {}).get("en_jp", "Unknown")
                 poster_img = attrs.get("posterImage") or {}
                 poster = poster_img.get("large") if isinstance(poster_img, dict) else ""
-                
-                kitsu_type = attrs.get("subtype", "TV")
-                stremio_type = "movie" if kitsu_type == "movie" else "series"
+                stremio_type = "anime"
 
                 stremio_metas.append({
                     "id": f"kitsu:{item.get('id')}",
@@ -91,10 +89,7 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
                     title = anime_attrs.get("canonicalTitle") or anime_attrs.get("titles", {}).get("en_jp", "Unknown")
                     poster_img = anime_attrs.get("posterImage") or {}
                     poster = poster_img.get("large") if isinstance(poster_img, dict) else ""
-
-                   
-                    kitsu_type = anime_attrs.get("subtype", "TV")
-                    stremio_type = "movie" if kitsu_type == "movie" else "series"
+                    stremio_type = "anime"
 
                     stremio_metas.append({
                         "id": f"kitsu:{anime_id}",
