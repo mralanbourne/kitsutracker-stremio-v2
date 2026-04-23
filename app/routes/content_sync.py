@@ -1,4 +1,5 @@
 import logging
+import base64
 from quart import Blueprint
 from app.services.db import get_valid_user, update_user_progress
 from app.services.kitsu_client import KitsuClient
@@ -11,7 +12,9 @@ logger = logging.getLogger(__name__)
 @content_sync_bp.route("/<auth_id>/subtitles/<catalog_type>/<stremio_id>/<path:extra>.json")
 async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra: str = ""):
     vtt_content = "WEBVTT\n\n00:00:00.000 --> 00:00:04.000\nKitsu: Sync sent"
-    dummy_sub = {"subtitles": [{"id": "kitsu-sync-status", "url": f"data:text/vtt;charset=utf-8,{vtt_content}", "lang": "Kitsu Sync Info"}]}
+    vtt_b64 = base64.b64encode(vtt_content.encode("utf-8")).decode("utf-8")
+    
+    dummy_sub = {"subtitles": [{"id": "kitsu-sync-status", "url": f"data:text/vtt;base64,{vtt_b64}", "lang": "Kitsu Sync Info"}]}
     cache_config = {"cache_max_age": 300, "stale_revalidate": 600}
 
     if not stremio_id.startswith("kitsu:"):
