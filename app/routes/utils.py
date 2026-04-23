@@ -1,6 +1,5 @@
 import datetime
 import logging
-import json
 from quart import Response, flash, jsonify, redirect, request, url_for
 import httpx
 
@@ -28,8 +27,6 @@ async def respond_with(
         data["staleRevalidate"] = stale_revalidate
 
     resp = jsonify(data)
-    resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Headers"] = "*"
 
     if cache_max_age > 0:
         cc_parts = ["private" if private else "public"]
