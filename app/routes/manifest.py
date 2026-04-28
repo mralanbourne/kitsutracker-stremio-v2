@@ -8,6 +8,10 @@ manifest_blueprint = Blueprint("manifest", __name__)
 
 genres = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"]
 
+#===============
+# The Base Manifest dictates how Stremio interacts with this addon
+# Defines catalogs, supported types, and requirements
+#===============
 MANIFEST: dict[str, Any] = {
     "id": "org.kitsu-stremio-sync",
     "version": "4.0.0",
@@ -59,6 +63,9 @@ MANIFEST: dict[str, Any] = {
 
 @manifest_blueprint.route("/manifest.json", methods=["GET", "OPTIONS"])
 async def addon_unconfigured_manifest():
+    #===============
+    # Returns the initial manifest prompting the user to complete configuration first
+    #===============
     unconfigured_manifest = MANIFEST.copy()
     unconfigured_manifest["logo"] = f"{request.host_url.rstrip('/')}/static/fox_small.png"
     unconfigured_manifest["behaviorHints"] = {
@@ -74,6 +81,10 @@ async def addon_unconfigured_manifest():
 
 @manifest_blueprint.route("/<user_id>/manifest.json", methods=["GET", "OPTIONS"])
 async def addon_configured_manifest(user_id: str):
+    #===============
+    # Returns a personalized manifest based on user selections in the UI config
+    # Filters out any catalogs the user chose not to include
+    #===============
     user = await get_user(user_id)
     if not user:
         return await respond_with({"error": "User not found"}, private=True, cache_max_age=1800)
