@@ -10,7 +10,9 @@ catalog_bp = Blueprint("catalog", __name__)
 logger = logging.getLogger(__name__)
 
 def _parse_stremio_filters(extra: str | None) -> dict:
-    """Parses extra parameters from Stremio URL (skip, search, etc.)."""
+    #===============
+    # Extracts skip offsets and search terms from the Stremio URL scheme
+    #===============
     if not extra: return {}
     filters = {}
     for part in extra.split("&"):
@@ -23,18 +25,19 @@ def _parse_stremio_filters(extra: str | None) -> dict:
 @catalog_bp.route("/<user_id>/catalog/<string:catalog_type>/<string:catalog_id>/<path:extras>.json")
 async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras: str):
     
-    # Validate Catalog ID against Manifest
+    #===============
+    # Validates if the requested catalog id actually exists in our defined manifest
+    # Protects against arbitrary API requests
+    #===============
     valid_ids = [c["id"] for c in MANIFEST["catalogs"]]
     if catalog_type != "anime" or catalog_id not in valid_ids:
         abort(404)
 
-    # User Validation
     user, error = await get_valid_user(user_id)
     if error:
         logger.warning(f"Catalog access denied for {user_id}: {error}")
         return await respond_with({"metas": []}, stremio_response=True)
 
-    # Caching Logic
     cache_time = 86400 if catalog_id == "kitsu_search" else 300
     filters = _parse_stremio_filters(extras)
     access_token = user.get("access_token")
@@ -42,6 +45,9 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
     stremio_metas = []
 
     try:
+        #===============
+        # Routing logic: Native search execution vs Database catalog execution
+        #===============
         if catalog_id == "kitsu_search":
             search_query = filters.get("search")
             if not search_query:
@@ -73,7 +79,6 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
             entries = data.get("data", [])
             included = data.get("included", [])
 
-            # Mapping
             anime_dict = {item["id"]: item.get("attributes", {}) for item in included if item.get("type") == "anime"}
 
             for entry in entries:
@@ -85,7 +90,6 @@ async def addon_catalog(user_id: str, catalog_type: str, catalog_id: str, extras
                     anime_attrs = anime_dict.get(anime_id)
                     if not anime_attrs: continue
 
-                    # Fallbacks
                     title = anime_attrs.get("canonicalTitle") or anime_attrs.get("titles", {}).get("en_jp", "Unknown")
                     poster_img = anime_attrs.get("posterImage") or {}
                     poster = poster_img.get("large") if isinstance(poster_img, dict) else ""
