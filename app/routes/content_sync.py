@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 @content_sync_bp.route("/<auth_id>/subtitles/<catalog_type>/<stremio_id>.json")
 @content_sync_bp.route("/<auth_id>/subtitles/<catalog_type>/<stremio_id>/<path:extra>.json")
 async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra: str = ""):
+    #===============
+    # Stremio queries subtitle tracks at runtime when a user presses play.
+    # We deliver a "dummy" WebVTT subtitle object back while running the Kitsu sync asynchronously.
+    #===============
     vtt_content = "WEBVTT\n\n00:00:00.000 --> 00:00:04.000\nKitsu: Sync sent"
     vtt_b64 = base64.b64encode(vtt_content.encode("utf-8")).decode("utf-8")
     
@@ -22,6 +26,8 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
 
     parts = stremio_id.split(":")
     anime_id = parts[1]
+    
+    # Extract precise episode integer regardless of stremio format
     try:
         episode = int(parts[3]) if len(parts) >= 4 else int(parts[2]) if len(parts) == 3 else 1
     except (ValueError, IndexError):
@@ -32,6 +38,8 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
         return await respond_with(dummy_sub, **cache_config)
 
     user_progress = user.get("progress") or {}
+    
+    # Avoid duplicate calls to API if user restarts the same episode
     if episode <= user_progress.get(anime_id, 0):
         return await respond_with(dummy_sub, **cache_config)
 
@@ -39,6 +47,9 @@ async def sync_progress(auth_id: str, catalog_type: str, stremio_id: str, extra:
     user_internal_id = user.get("id")
 
     try:
+        #===============
+        # First query anime data to ensure we correctly move it to "completed" if it's the final episode
+        #===============
         anime_data = await KitsuClient.get_anime(anime_id, access_token)
         total_episodes = anime_data.get("data", {}).get("attributes", {}).get("episodeCount")
         
