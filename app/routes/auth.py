@@ -11,12 +11,19 @@ auth_blueprint = Blueprint("auth", __name__)
 logger = logging.getLogger(__name__)
 
 def _store_user_session(uid: str) -> None:
-    # SECURITY FIX: Niemals sensible Refresh-Tokens in der Client-Session speichern!
+    #===============
+    # Establishes a permanent browser session
+    # We only store the internal User ID. Sensitive refresh tokens stay isolated in the backend database.
+    #===============
     session["user"] = {"uid": uid}
     session.permanent = True
 
 @auth_blueprint.route("/login", methods=["POST"])
 async def login() -> Response:
+    #===============
+    # Executes Kitsu login securely. Passwords are consumed directly over HTTPS,
+    # used once to generate tokens, and discarded entirely.
+    #===============
     if "user" in session:
         await flash("You are already logged in.", "warning")
         return redirect(url_for("ui.index"))
@@ -59,11 +66,14 @@ async def login() -> Response:
 
 @auth_blueprint.route("/refresh")
 async def refresh_token() -> Response:
+    #===============
+    # Manual token refresh endpoint, usually triggered by the user via UI
+    # Pulls the secure refresh token explicitly from the database context
+    #===============
     user_session = session.get("user")
     if not user_session:
         return redirect(url_for("ui.index"))
 
-    # Da das Token nicht mehr im Cookie ist, holen wir es sicher aus der Datenbank
     user_db = await get_user(user_session["uid"])
     if not user_db or "refresh_token" not in user_db:
         session.pop("user", None)
@@ -93,5 +103,8 @@ async def refresh_token() -> Response:
 
 @auth_blueprint.route("/logout")
 async def logout() -> Response:
+    #===============
+    # Destroys the local browser session effectively logging the user out visually
+    #===============
     session.pop("user", None)
     return redirect(url_for("ui.index"))
