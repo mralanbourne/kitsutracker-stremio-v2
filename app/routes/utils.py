@@ -4,6 +4,9 @@ from quart import Response, flash, jsonify, redirect, request, url_for
 import httpx
 
 async def handle_auth_error(err: httpx.HTTPStatusError):
+    #===============
+    # Intercepts HTTP errors during authentication and translates them to frontend alerts
+    #===============
     if not err.response:
         await flash("No valid response from Kitsu. Service might be down.", "danger")
         return redirect(url_for("ui.index"))
@@ -22,6 +25,10 @@ async def respond_with(
     stale_error: int = 0,
     stremio_response: bool = False,
 ) -> Response:
+    #===============
+    # Specialized JSON response formatter required for Stremio Addons
+    # Constructs proper HTTP caching headers explicitly to optimize bandwidth
+    #===============
     if stremio_response:
         data["cacheMaxAge"] = cache_max_age
         data["staleRevalidate"] = stale_revalidate
