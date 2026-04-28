@@ -10,13 +10,22 @@ from cachetools import TTLCache
 
 logger = logging.getLogger(__name__)
 
+#===============
+# Authorization header for Upstash Redis REST API
+#===============
 headers = {"Authorization": f"Bearer {Config.UPSTASH_REDIS_REST_TOKEN}"}
 
-# RAM-Cache: TTL reduced to 60s to prevent Split-Brain in Multi-Node-Setups
+#===============
+# Setup an in-memory cache to reduce redundant network calls to Upstash
+# The TTL is kept extremely low (60 seconds) to prevent stale data in distributed environments
+#===============
 user_cache = TTLCache(maxsize=1000, ttl=60)
 
 async def _redis_command(payload: list):
-    """Führt generische Redis-Kommandos über die Upstash REST API aus (z.B. für Locks)."""
+    #===============
+    # Executes arbitrary Redis commands through the REST API
+    # Essential for complex operations like acquiring distributed locks
+    #===============
     url = f"{Config.UPSTASH_REDIS_REST_URL}/"
     client = current_app.httpx_client 
     try:
@@ -28,6 +37,10 @@ async def _redis_command(payload: list):
         return None
 
 async def _redis_request(method: str, endpoint: str, payload: str = None):
+    #===============
+    # Wrapper for standard HTTP GET and POST requests to Upstash
+    # Includes error handling and automatic timeout definitions
+    #===============
     url = f"{Config.UPSTASH_REDIS_REST_URL}/{endpoint}"
     client = current_app.httpx_client 
     try:
@@ -42,11 +55,18 @@ async def _redis_request(method: str, endpoint: str, payload: str = None):
         return {}
 
 async def acquire_lock(lock_key: str, expire_seconds: int = 15) -> bool:
-    """Enterprise Distributed Lock via Redis SET NX EX."""
+    #===============
+    # Creates a distributed lock to prevent race conditions during token refresh
+    # Uses Redis "SET NX EX" meaning "Set if Not eXists, with Expiry"
+    #===============
     result = await _redis_command(["SET", lock_key, "1", "NX", "EX", str(expire_seconds)])
     return result == "OK"
 
 async def get_user(user_id: str) -> Optional[dict]:
+    #===============
+    # Fetches user data. Checks the local RAM cache first for extreme speed.
+    # If not present, requests the data from the Upstash Redis database.
+    #===============
     if user_id in user_cache:
         return copy.deepcopy(user_cache[user_id])
         
@@ -68,7 +88,10 @@ async def get_user(user_id: str) -> Optional[dict]:
         return None
 
 async def store_user(user_details: dict, retries: int = 3) -> bool:
-    """Speichert den Nutzer mit Guaranteed Write (Retry-Logik bei DB-Aussetzern)."""
+    #===============
+    # Saves user data back to the database with a guaranteed write mechanism
+    # Automatically retries the operation multiple times with backoff if network issues occur
+    #===============
     user_id = user_details.get("uid") or user_details.get("id")
     user_details["uid"] = user_id
     
@@ -90,6 +113,9 @@ async def store_user(user_details: dict, retries: int = 3) -> bool:
     return False
 
 async def update_user_progress(user: dict, anime_id: str, episode: int) -> bool:
+    #===============
+    # Updates the internal tracking dictionary with the user's latest watched episode
+    #===============
     if not isinstance(user.get("progress"), dict):
         user["progress"] = {}
         
@@ -97,6 +123,11 @@ async def update_user_progress(user: dict, anime_id: str, episode: int) -> bool:
     return await store_user(user)
 
 async def get_valid_user(user_id: str) -> tuple[dict, Optional[str]]:
+    #===============
+    # Validates if the user's Kitsu session is still active and valid.
+    # If the token is nearing expiration, it proactively uses the distributed lock
+    # to refresh the session in the background without interrupting the user experience.
+    #===============
     user = await get_user(user_id)
     if not user:
         return {}, "No user found. Please re-login to Kitsu."
@@ -106,11 +137,9 @@ async def get_valid_user(user_id: str) -> tuple[dict, Optional[str]]:
 
     expiration_date = user["last_updated"] + timedelta(seconds=user["expires_in"])
     
-    # Auto-Refresh Kitsu Token with Distributed Locking
     if datetime.utcnow() > (expiration_date - timedelta(minutes=5)):
         lock_key = f"lock:refresh:{user_id}"
         
-        # Try to get the exclusive lock
         if await acquire_lock(lock_key, expire_seconds=15):
             logger.info(f"Lock acquired. Refreshing token for user {user_id}.")
             from app.services.kitsu_client import KitsuClient
