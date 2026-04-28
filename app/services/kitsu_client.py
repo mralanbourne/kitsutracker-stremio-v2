@@ -7,6 +7,9 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 class KitsuClient:
+    #===============
+    # Kitsu REST API endpoint URLs
+    #===============
     KITSU_API_URL = "https://kitsu.io/api/edge"
     KITSU_OAUTH_URL = "https://kitsu.io/api/oauth/token"
 
@@ -18,9 +21,12 @@ class KitsuClient:
 
     @classmethod
     async def _request_with_retry(cls, method: str, url: str, retries=3, user_id_for_lock=None, **kwargs):
+        #===============
+        # Core HTTP request handler featuring exponential backoff and rate limit protection
+        # Implements a semaphore to prevent hammering the API simultaneously for the same user
+        #===============
         client = cls._get_client()
         
-        # Concurrency Control: Semaphore "lazy"
         if user_id_for_lock:
             if user_id_for_lock not in cls._user_semaphores:
                 cls._user_semaphores[user_id_for_lock] = asyncio.Semaphore(3)
@@ -47,9 +53,9 @@ class KitsuClient:
                         logger.error(f"Kitsu API failed after {retries} attempts on {url}: {e}")
                         raise
                     
-                    # Safe Backoff for AttributeError @ Timeouts
                     wait_time = 1 * (attempt + 1)
                     if hasattr(e, "response") and e.response is not None:
+                        # Double the wait time if we hit a Rate Limit (HTTP 429)
                         if e.response.status_code == 429:
                             wait_time = 2 * (attempt + 1)
                             
