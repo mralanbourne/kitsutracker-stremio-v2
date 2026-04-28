@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://kitsutracker.koyeb.app/static/fox.png" width="300" alt="Kitsu Logo">
+  <img src="https://kitsu.ruka.pw/static/fox.png" width="300" alt="Kitsu Logo">
 </p>
 
 <h1 align="center">Kitsu Tracker for Stremio V2</h1>
